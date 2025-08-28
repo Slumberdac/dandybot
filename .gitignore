@@ -209,3 +209,6 @@ __marimo__/
 # Scores
 .csv
 .md
+
+# Logs
+logs/
