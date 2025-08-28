@@ -4,9 +4,10 @@ from random import choice
 import discord
 import pandas as pd
 
+# Sets the permissions the bot can you, should match with those selected in the developper portal
 intents = discord.Intents.default()
-intents.message_content = True
-intents.members = True
+intents.message_content = True # Can see messages text
+intents.members = True  # Can ping members of the server
 
 client = discord.Client(intents=intents)
 
@@ -126,6 +127,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message: discord.Message):
+    # Here to avoid any risk of infinite loop while developpment, if the recieved message is from yourself, don't do anything
     if message.author == client.user:
         return
 
@@ -176,7 +178,6 @@ async def on_message(message: discord.Message):
             with open(f"scores_{message.guild.id}.md", "w+") as f:
                 f.write("No scores yet")
         with open(f"scores_{message.guild.id}.md", "r") as f:
-            print(f.read())
             f.seek(0)
             await message.channel.send(f.read())
 
@@ -189,9 +190,6 @@ async def on_message(message: discord.Message):
         role: discord.role.Role = discord.utils.get(
             message.guild.roles, name="Dandy GOAT"
         )
-        print(role.members)
-        print(message.author)
-        print(role.members[0].id == message.author.id)
 
 
 async def slayerbot():
