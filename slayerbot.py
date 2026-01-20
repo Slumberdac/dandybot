@@ -9,6 +9,7 @@ intents = discord.Intents.default()
 intents.message_content = True # Can see messages text
 intents.members = True  # Can ping members of the server
 
+
 client = discord.Client(intents=intents)
 
 lines1 = [
@@ -212,15 +213,16 @@ async def gorilla():
 
 
 async def update_scores(message: discord.Message, counter: int):
+    print("HERE", message.author.name, counter)
     if not os.path.exists(f"scores_{message.guild.id}.csv"):
         scores = pd.DataFrame(columns=["user", "low", "high"])
         scores.to_csv(f"scores_{message.guild.id}.csv", index=False)
 
     scores = pd.read_csv(
         f"scores_{message.guild.id}.csv",
-        dtype={"user": "int64", "low": "int64", "high": "int64"},
+        dtype={"user": "object", "low": "int64", "high": "int64"},
     )
-    user = message.author.id
+    user = message.author.name
     # Wether the user has a new high or low score
     new_player_score = 0
     # wether there is a new general high or low score
@@ -245,29 +247,35 @@ async def update_scores(message: discord.Message, counter: int):
 
         if counter < scores["low"].min():
             new_general_score = 1
-            role = discord.utils.get(message.guild.roles, name="Dandy GOAT")
-            if not role:
-                await message.guild.create_role("Dandy GOAT")
-                await message.author.add_roles(role)
-            if role.members:
-                if message.author.id != role.members[0].id:
-                    await role.members[0].remove_roles(role)
+            try:
+                role = discord.utils.get(message.guild.roles, name="Dandy GOAT")
+                if not role:
+                    await message.guild.create_role("Dandy GOAT")
                     await message.author.add_roles(role)
-            else:
-                await message.author.add_roles(role)
+                if role.members:
+                    if message.author.id != role.members[0].id:
+                        await role.members[0].remove_roles(role)
+                        await message.author.add_roles(role)
+                else:
+                    await message.author.add_roles(role)
+            except Exception:
+                pass
 
         if counter > scores["high"].max():
             new_general_score = 2
-            role = discord.utils.get(message.guild.roles, name="Dandy TOAD")
-            if not role:
-                await message.guild.create_role("Dandy TOAD")
-                await message.author.add_roles(role)
-            if role.members:
-                if message.author.id != role.members[0].id:
-                    await role.members[0].remove_roles(role)
+            try:
+                role = discord.utils.get(message.guild.roles, name="Dandy TOAD")
+                if not role:
+                    await message.guild.create_role("Dandy TOAD")
                     await message.author.add_roles(role)
-            else:
-                await message.author.add_roles(role)
+                if role.members:
+                    if message.author.id != role.members[0].id:
+                        await role.members[0].remove_roles(role)
+                        await message.author.add_roles(role)
+                else:
+                    await message.author.add_roles(role)
+            except Exception:
+                pass
 
         scores.loc[scores["user"] == user, "low"] = min(
             scores.loc[scores["user"] == user, "low"].values[0], counter
@@ -292,18 +300,19 @@ async def update_scores_markdown(scores: pd.DataFrame, server_id: int):
         f.write(f"## Lowest number of attempts:\n")
         i = 0
         for index, row in low_scores.iterrows():
-            f.write(f"{i+1}. <@{row['user']}>: {row['low']} attempts\n")
+            f.write(f"{i+1}. {row['user']}: {row['low']} attempts\n")
             i += 1
         f.write(f"## Highest number of attempts:\n")
         i = 0
         for index, row in high_scores.iterrows():
-            f.write(f"{i+1}. <@{row['user']}>: {row['high']} attempts\n")
+            f.write(f"{i+1}. {row['user']}: {row['high']} attempts\n")
             i += 1
         f.write("## Players scores:\n")
         for i, row in scores.iterrows():
             f.write(
-                f"<@{row['user']}>: Lowest: {row['low']} attempts, Highest: {row['high']} attempts\n"
+                f"{row['user']}: Lowest: {row['low']} attempts, Highest: {row['high']} attempts\n"
             )
 
 
 client.run(os.environ.get("DISCORD_KEY"))
+
