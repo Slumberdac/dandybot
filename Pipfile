@@ -5,8 +5,7 @@ name = "pypi"
 
 [packages]
 discord = "*"
-numpy = "*"
 pandas = "*"
-isort = "*"
 
 [dev-packages]
+isort = "*"
